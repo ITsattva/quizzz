@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="50dp"
+    tools:context=".MainActivity">
+
+
+    <TextView
+        android:id="@+id/tv_upside"
+        android:paddingHorizontal="100dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_upside"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="70dp">
+        <Button
+            android:id="@+id/b_1"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="@string/first_button"/>
+        <Button
+            android:id="@+id/b_2"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="@string/second_button"/>
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/b_3"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="@string/third_button"/>
+        <Button
+            android:id="@+id/b_4"
+            android:layout_width="150dp"
+            android:layout_height="50dp"
+            android:text="@string/fourth_button"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_bellow"
+        android:paddingHorizontal="115dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_bellow"/>
+
+</LinearLayout>

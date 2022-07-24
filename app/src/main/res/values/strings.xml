@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">QuizzSport</string>
+    <string name="first_button">First button</string>
+    <string name="second_button">Second button</string>
+    <string name="third_button">Third button</string>
+    <string name="fourth_button">Fourth button</string>
+    <string name="text_bellow">Text bellow</string>
+    <string name="text_upside">Text upside</string>
+</resources>
