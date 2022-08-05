@@ -1,5 +1,6 @@
 package com.example.quizzsport;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
@@ -26,7 +27,6 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private static short answersCount = 2;
     private MyDB db;
     private RadioGroup radioGroup;
     private RadioButton button1;
@@ -56,42 +56,46 @@ public class MainActivity extends AppCompatActivity {
         View.OnClickListener listener = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                int id = radioGroup.getCheckedRadioButtonId();
-                RadioButton radio = findViewById(id);
-                String currentAnswer = radio.getText().toString();
+                String textOnButton = answerButton.getText().toString();
 
-                if (checkAnswer(currentAnswer)) {
-                    showRight();
+                if(textOnButton.equals("ДАЛЕЕ")) {
+                    restartButtons();
                     radioGroup.clearCheck();
+                    createQuestion();
+                    //todo restart all the questions and the colors, return common button text
                 } else {
-                    showWrong();
+                    System.out.println(textOnButton);
+                    int id = radioGroup.getCheckedRadioButtonId();
+                    RadioButton radio = findViewById(id);
+                    String currentAnswer = radio.getText().toString();
+
+                    if (checkAnswer(currentAnswer)) {
+                        showRight();
+                    } else {
+                        showWrong();
+                    }
                 }
             }
         };
         answerButton.setOnClickListener(listener);
 
         db = new MyDB(this);
-        //dbManager.insertIntoDB("первый вопрос", new String[]{"1", "2", "3", "4"});
         questions = db.getQuestionsFromDB();
         createQuestion();
     }
 
     private boolean checkAnswer(String answer) {
-        answersCount--;
-
         for (Question question : questions) {
             System.out.println(question.getDescription());
             if (question.getAnswer1().equals(answer)) {
                 return true;
             }
         }
-
         return false;
     }
 
 
     private void createQuestion() {
-        answersCount = 2;
         Random random = new Random();
         int rand = random.nextInt(questions.size());
 
@@ -107,21 +111,19 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showWrong() {
-        if (answersCount <= 0) {
-            Toast toast = Toast.makeText(MainActivity.this, "Ответ неверный!", Toast.LENGTH_SHORT);
-            toast.show();
-            createQuestion();
-        } else {
-            answersCount--;
-            Toast toast = Toast.makeText(MainActivity.this, "Ответ неверный! У тебя есть еще одна попытка!", Toast.LENGTH_SHORT);
-            toast.show();
-        }
+        int id = radioGroup.getCheckedRadioButtonId();
+        RadioButton radio = findViewById(id);
+        radio.setBackgroundColor(Color.rgb(180, 50, 50));
+        radio.getBackground().setAlpha(80);
+        answerButton.setText("ДАЛЕЕ");
     }
 
     private void showRight() {
-        answersCount = 2;
-        Toast toast = Toast.makeText(MainActivity.this, "Молодец!", Toast.LENGTH_SHORT);
-        toast.show();
+        int id = radioGroup.getCheckedRadioButtonId();
+        RadioButton radio = findViewById(id);
+        radio.setBackgroundColor(Color.rgb(50, 180, 50));
+        radio.getBackground().setAlpha(80);
+        answerButton.setText("ДАЛЕЕ");
     }
 
     private String[] mixAnswers(String[] array) {
@@ -131,6 +133,18 @@ public class MainActivity extends AppCompatActivity {
         String[] arr = (String[]) list.toArray();
 
         return arr;
+    }
+
+    private void restartButtons(){
+//        button1.getBackground().setAlpha(0);
+//        button2.getBackground().setAlpha(0);
+//        button3.getBackground().setAlpha(0);
+//        button4.getBackground().setAlpha(0);
+        button1.setBackgroundColor(Color.TRANSPARENT);
+        button2.setBackgroundColor(Color.TRANSPARENT);
+        button3.setBackgroundColor(Color.TRANSPARENT);
+        button4.setBackgroundColor(Color.TRANSPARENT);
+        answerButton.setText("ОТВЕТ!");
     }
 
     private void copyDataBase() throws IOException {
@@ -151,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
             System.out.println("PROCESS");
             myOutput.write(buffer, 0, length);
         }
-
         //закрываем потоки
         myOutput.flush();
         myOutput.close();
