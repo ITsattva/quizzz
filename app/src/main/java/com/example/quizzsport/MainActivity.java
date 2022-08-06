@@ -1,7 +1,12 @@
 package com.example.quizzsport;
 
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -20,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,16 +33,17 @@ import java.util.List;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    private String rightAnswer;
     private MyDB db;
     private RadioGroup radioGroup;
     private RadioButton button1;
     private RadioButton button2;
     private RadioButton button3;
     private RadioButton button4;
-    //private Button answerButton;
     private TextView upsideText;
     private List<Question> questions = new ArrayList<>();
-
+    private List<RadioButton> buttons = new ArrayList<>();
+    private UnlockReceiver unlockReceiver = new UnlockReceiver();
 
 
     @Override
@@ -44,6 +51,8 @@ public class MainActivity extends AppCompatActivity {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        registerBroadcastReceiver();
+
 
         radioGroup = findViewById(R.id.rg_1);
         button1 = findViewById(R.id.b_1);
@@ -55,22 +64,22 @@ public class MainActivity extends AppCompatActivity {
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup radioGroup, int i) {
+//                if (i==-1) {
+//                    return;
+//                }
                 int id = radioGroup.getCheckedRadioButtonId();
                 RadioButton radio = findViewById(id);
-                String currentAnswer = radio.getText().toString();
-
-                if (checkAnswer(currentAnswer)) {
-                    showRight();
-
-                        restartButtons();
-                        radioGroup.clearCheck();
-                        createQuestion();
-                } else {
-                    showWrong();
-
-                        restartButtons();
-                        radioGroup.clearCheck();
-                        createQuestion();
+                String currentAnswer = "";
+                if (radio != null) {
+                    currentAnswer = radio.getText().toString();
+                    if (checkAnswer(currentAnswer)) {
+                        showRight();
+                    } else {
+                        showWrong();
+                        findRightAnswer();
+                    }
+                    radioGroup.clearCheck();
+                    restart(1000L);
                 }
             }
         });
@@ -78,6 +87,60 @@ public class MainActivity extends AppCompatActivity {
         db = new MyDB(this);
         questions = db.getQuestionsFromDB();
         createQuestion();
+        buttons = Arrays.asList(button1, button2, button3, button4);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+
+                int id = radioGroup.getCheckedRadioButtonId();
+                RadioButton radio = findViewById(id);
+                String currentAnswer = "";
+                if (radio != null) {
+                    currentAnswer = radio.getText().toString();
+                    if (checkAnswer(currentAnswer)) {
+                        showRight();
+                    } else {
+                        showWrong();
+                        findRightAnswer();
+                    }
+                    radioGroup.clearCheck();
+                    restartOnResume(1000L);
+                }
+            }
+        });
+    }
+
+    private void restart(Long millis) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                restartButtons();
+                createQuestion();
+            }
+        }, millis);
+    }
+
+    private void restartOnResume(Long millis) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                restartButtons();
+                createQuestion();
+                rollUp();
+            }
+        }, millis);
+    }
+
+    public void rollUp() {
+        Intent startMain = new Intent(Intent.ACTION_MAIN);
+        startMain.addCategory(Intent.CATEGORY_HOME);
+        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(startMain);
     }
 
     private boolean checkAnswer(String answer) {
@@ -96,6 +159,7 @@ public class MainActivity extends AppCompatActivity {
         int rand = random.nextInt(questions.size());
 
         Question question = questions.get(rand);
+        rightAnswer = question.getAnswer1();
 
         upsideText.setText(question.getDescription());
         String[] array = mixAnswers(new String[]{question.getAnswer1(), question.getAnswer2(),
@@ -111,7 +175,6 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radio = findViewById(id);
         radio.setBackgroundColor(Color.rgb(180, 50, 50));
         radio.getBackground().setAlpha(80);
-        //answerButton.setText("ДАЛЕЕ");
     }
 
     private void showRight() {
@@ -119,7 +182,6 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radio = findViewById(id);
         radio.setBackgroundColor(Color.rgb(50, 180, 50));
         radio.getBackground().setAlpha(80);
-        //answerButton.setText("ДАЛЕЕ");
     }
 
     private String[] mixAnswers(String[] array) {
@@ -132,29 +194,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void restartButtons(){
-//        button1.getBackground().setAlpha(0);
-//        button2.getBackground().setAlpha(0);
-//        button3.getBackground().setAlpha(0);
-//        button4.getBackground().setAlpha(0);
         button1.setBackgroundColor(Color.TRANSPARENT);
         button2.setBackgroundColor(Color.TRANSPARENT);
         button3.setBackgroundColor(Color.TRANSPARENT);
         button4.setBackgroundColor(Color.TRANSPARENT);
-        //answerButton.setText("ОТВЕТ!");
+    }
+
+    private void findRightAnswer(){
+        for (RadioButton button : buttons) {
+            if (button.getText().toString().equals(rightAnswer)) {
+                button.setBackgroundColor(Color.rgb(50, 180, 50));
+                button.getBackground().setAlpha(80);
+            }
+        }
     }
 
     private void copyDataBase() throws IOException {
-        System.out.println("COPYING DB");
-        //Открываем локальную БД как входящий поток
         InputStream myInput = this.getAssets().open("questions.db");
-        System.out.println("After searching copied db");
-        //Путь ко вновь созданной БД
         String outFileName = Constants.DB_PATH+"quiz";
-
-        //Открываем пустую базу данных как исходящий поток
         OutputStream myOutput = new FileOutputStream(outFileName);
-
-        //перемещаем байты из входящего файла в исходящий
         byte[] buffer = new byte[1024];
         int length;
         while ((length = myInput.read(buffer))>0){
@@ -165,6 +223,21 @@ public class MainActivity extends AppCompatActivity {
         myOutput.flush();
         myOutput.close();
         myInput.close();
+    }
+
+    public void registerBroadcastReceiver() {
+        this.registerReceiver(unlockReceiver, new IntentFilter(
+                "android.intent.action.SCREEN_ON"));
+        Toast.makeText(getApplicationContext(), "Приёмник включен",
+                Toast.LENGTH_SHORT).show();
+    }
+
+    // Отменяем регистрацию
+    public void unregisterBroadcastReceiver(View view) {
+        this.unregisterReceiver(unlockReceiver);
+
+        Toast.makeText(getApplicationContext(), "Приёмник выключён", Toast.LENGTH_SHORT)
+                .show();
     }
 
 }
