@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private RadioButton button2;
     private RadioButton button3;
     private RadioButton button4;
-    private Button answerButton;
+    //private Button answerButton;
     private TextView upsideText;
     private List<Question> questions = new ArrayList<>();
 
@@ -51,33 +51,29 @@ public class MainActivity extends AppCompatActivity {
         button3 = findViewById(R.id.b_3);
         button4 = findViewById(R.id.b_4);
         upsideText = findViewById(R.id.tv_upside);
-        answerButton = findViewById(R.id.b_answer);
 
-        View.OnClickListener listener = new View.OnClickListener() {
+        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
-            public void onClick(View view) {
-                String textOnButton = answerButton.getText().toString();
+            public void onCheckedChanged(RadioGroup radioGroup, int i) {
+                int id = radioGroup.getCheckedRadioButtonId();
+                RadioButton radio = findViewById(id);
+                String currentAnswer = radio.getText().toString();
 
-                if(textOnButton.equals("ДАЛЕЕ")) {
-                    restartButtons();
-                    radioGroup.clearCheck();
-                    createQuestion();
-                    //todo restart all the questions and the colors, return common button text
+                if (checkAnswer(currentAnswer)) {
+                    showRight();
+
+                        restartButtons();
+                        radioGroup.clearCheck();
+                        createQuestion();
                 } else {
-                    System.out.println(textOnButton);
-                    int id = radioGroup.getCheckedRadioButtonId();
-                    RadioButton radio = findViewById(id);
-                    String currentAnswer = radio.getText().toString();
+                    showWrong();
 
-                    if (checkAnswer(currentAnswer)) {
-                        showRight();
-                    } else {
-                        showWrong();
-                    }
+                        restartButtons();
+                        radioGroup.clearCheck();
+                        createQuestion();
                 }
             }
-        };
-        answerButton.setOnClickListener(listener);
+        });
 
         db = new MyDB(this);
         questions = db.getQuestionsFromDB();
@@ -115,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radio = findViewById(id);
         radio.setBackgroundColor(Color.rgb(180, 50, 50));
         radio.getBackground().setAlpha(80);
-        answerButton.setText("ДАЛЕЕ");
+        //answerButton.setText("ДАЛЕЕ");
     }
 
     private void showRight() {
@@ -123,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         RadioButton radio = findViewById(id);
         radio.setBackgroundColor(Color.rgb(50, 180, 50));
         radio.getBackground().setAlpha(80);
-        answerButton.setText("ДАЛЕЕ");
+        //answerButton.setText("ДАЛЕЕ");
     }
 
     private String[] mixAnswers(String[] array) {
@@ -144,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
         button2.setBackgroundColor(Color.TRANSPARENT);
         button3.setBackgroundColor(Color.TRANSPARENT);
         button4.setBackgroundColor(Color.TRANSPARENT);
-        answerButton.setText("ОТВЕТ!");
+        //answerButton.setText("ОТВЕТ!");
     }
 
     private void copyDataBase() throws IOException {
