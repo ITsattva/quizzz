@@ -14,7 +14,8 @@ import java.util.List;
 public class MyDB extends SQLiteAssetHelper {
 
     private static final String DATABASE_NAME = "quizz.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 7;
+    public static String TABLE_NAME = "sport";
 
     public MyDB(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -25,7 +26,7 @@ public class MyDB extends SQLiteAssetHelper {
         SQLiteDatabase db = getReadableDatabase();
 
         List<Question> questions = new ArrayList<>();
-        Cursor cursor = db.query(Constants.TABLE_NAME, null, null, null,
+        Cursor cursor = db.query(TABLE_NAME, null, null, null,
                 null, null, null);
         while (cursor.moveToNext()) {
             @SuppressLint("Range") String description = cursor.getString(cursor.getColumnIndex(Constants.COLUMN_NAME_QUESTION));
@@ -41,5 +42,9 @@ public class MyDB extends SQLiteAssetHelper {
 
         cursor.close();
         return questions;
+    }
+
+    public void setTable(String table){
+        TABLE_NAME = table;
     }
 }

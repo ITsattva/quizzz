@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -45,6 +47,46 @@ public class MainActivity extends AppCompatActivity {
     private List<RadioButton> buttons = new ArrayList<>();
     private UnlockReceiver unlockReceiver = new UnlockReceiver();
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        switch(id) {
+            case R.id.artro:
+                db.setTable("sport");
+                questions = db.getQuestionsFromDB();
+                createQuestion();
+
+                return true;
+            case R.id.muscle:
+                db.setTable("muscles");
+                questions = db.getQuestionsFromDB();
+                createQuestion();
+
+                return true;
+            case R.id.sql:
+                db.setTable("sql");
+                questions = db.getQuestionsFromDB();
+                createQuestion();
+
+                return true;
+            case R.id.spring_eng:
+                db.setTable("spring_eng");
+                questions = db.getQuestionsFromDB();
+                createQuestion();
+
+                return true;
+        }
+
+        return true;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,8 +270,6 @@ public class MainActivity extends AppCompatActivity {
     public void registerBroadcastReceiver() {
         this.registerReceiver(unlockReceiver, new IntentFilter(
                 "android.intent.action.SCREEN_ON"));
-        Toast.makeText(getApplicationContext(), "Приёмник включен",
-                Toast.LENGTH_SHORT).show();
     }
 
     // Отменяем регистрацию

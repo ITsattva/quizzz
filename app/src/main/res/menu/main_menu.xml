@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/artro"
+        android:orderInCategory="1"
+        android:title="Суставы" />
+
+    <item
+        android:id="@+id/muscle"
+        android:orderInCategory="2"
+        android:title="Мышцы" />
+    <item
+        android:id="@+id/sql"
+        android:orderInCategory="1"
+        android:title="SQL" />
+
+    <item
+        android:id="@+id/spring_eng"
+        android:orderInCategory="2"
+        android:title="Spring(ENG)" />
+</menu>
